@@ -28,9 +28,13 @@ async def main(page: ft.Page):
 
     # Função de exclusão assíncrona
     async def excluir_produto(e, produto_obj):
-        db = carregar_dados()
-        nova_lista = [p for p in db if not (p['nome'] == produto_obj['nome'] and p['preco'] == produto_obj['preco'])]
-        salvar_dados(nova_lista)
+        from database import deletar_produto_db
+        
+        # Deleta do PostgreSQL usando os dados do objeto
+        deletar_produto_db(produto_obj['nome'], produto_obj['preco'])
+        
+        # Atualiza a interface de forma assíncrona
+        await renderizar_com_controles()
         page.pubsub.send_all("update")
 
     # Função de renderização assíncrona para evitar NotImplementedError
