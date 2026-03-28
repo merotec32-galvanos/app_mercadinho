@@ -3,3 +3,5 @@ flet-fastapi
 urllib3
 uvicorn
 gunicorn
+sqlalchemy
+psycopg2-binary
