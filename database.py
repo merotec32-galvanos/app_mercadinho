@@ -47,8 +47,21 @@ def salvar_novo_produto(nome, desc, preco, imagem):
 
 def deletar_produto_db(nome, preco):
     db = SessionLocal()
-    produto = db.query(Produto).filter(Produto.nome == nome, Produto.preco == preco).first()
-    if produto:
-        db.delete(produto)
-        db.commit()
-    db.close()
+    try:
+        # Busca o produto ignorando espaços em branco extras
+        produto = db.query(Produto).filter(
+            Produto.nome == nome.strip(), 
+            Produto.preco == preco.strip()
+        ).first()
+        
+        if produto:
+            db.delete(produto)
+            db.commit()
+            print(f"SUCESSO: {nome} deletado do banco real.")
+        else:
+            print(f"AVISO: Produto {nome} com preço {preco} não encontrado.")
+    except Exception as e:
+        db.rollback()
+        print(f"ERRO AO DELETAR: {e}")
+    finally:
+        db.close()

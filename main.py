@@ -28,7 +28,6 @@ async def main(page: ft.Page):
 
     # Função de exclusão assíncrona
     async def excluir_produto(e, produto_obj):
-        from database import deletar_produto_db
         
         # Deleta do PostgreSQL usando os dados do objeto
         deletar_produto_db(produto_obj['nome'], produto_obj['preco'])
@@ -82,6 +81,7 @@ async def main(page: ft.Page):
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
     page.overlay.append(picker)
+    await page.update_async()
 
     async def postar_clique(e):
         if txt_nome.value:
