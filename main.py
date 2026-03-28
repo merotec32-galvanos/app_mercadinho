@@ -1,5 +1,6 @@
 import flet as ft
-from flet_fastapi import FletFastAPI
+from fastapi import FastAPI
+from flet_fastapi import FletApp
 import os
 import uvicorn
 import urllib.parse
@@ -8,7 +9,7 @@ from database import carregar_dados, salvar_dados
 from cliente import cliente
 
 os.environ["FLET_SECRET_KEY"] = "mercadinho_familia_2026"
-
+app = FastAPI()
 def main(page: ft.Page):
     page.title = "Mercadinho Digital"
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -124,7 +125,7 @@ def main(page: ft.Page):
     page.on_route_change = rota_mudou
     page.go(page.route)
 
-app = FletFastAPI(main)
+app.mount("/", FletApp(main))
 
 if __name__ == "__main__":
     import uvicorn
