@@ -1,5 +1,5 @@
 import flet as ft
-import flet_fastapi.flet_fastapi as flet_fastap
+import flet_fastapi.flet_fastapi as flet_fastapi
 import os
 import uvicorn
 import urllib.parse
