@@ -85,14 +85,26 @@ async def main(page: ft.Page):
 
     async def postar_clique(e):
         if txt_nome.value:
-            db = carregar_dados()
-            novo = {"nome": txt_nome.value.upper(), "desc": txt_desc.value, "preco": txt_preco.value, 
-                    "imagem": txt_imagem_nome.value if txt_imagem_nome.value != "Nenhuma foto selecionada" else ""}
-            db.insert(0, novo)
-            salvar_novo_produto(db)
-            txt_nome.value = ""; txt_desc.value = ""; txt_preco.value = ""
-            txt_imagem_nome.value = "Nenhuma foto selecionada"; img_previa.visible = False
+            # 1. Pega os valores diretamente dos campos de texto
+            nome = txt_nome.value.upper()
+            desc = txt_desc.value
+            preco = txt_preco.value
+            imagem = txt_imagem_nome.value if txt_imagem_nome.value != "Nenhuma foto selecionada" else ""
+            
+            # 2. Chama a função do database.py passando os 4 argumentos
+            salvar_novo_produto(nome, desc, preco, imagem)
+            
+            # 3. Limpa a interface
+            txt_nome.value = ""
+            txt_desc.value = ""
+            txt_preco.value = ""
+            txt_imagem_nome.value = "Nenhuma foto selecionada"
+            img_previa.visible = False
+            
+            # 4. Notifica todos e renderiza a nova lista
             page.pubsub.send_all("update")
+            await renderizar_com_controles() 
+            await page.update_async()
 
     page.pubsub.subscribe(lambda _: page.run_task(renderizar_com_controles))
 
@@ -113,7 +125,7 @@ async def main(page: ft.Page):
                 controls=[ft.Container(ft.Column([
                     txt_nome, txt_desc, txt_preco,
                     ft.Row([
-                        ft.ElevatedButton("FOTO", icon=ft.icons.CAMERA_ALT, on_click=lambda _: picker.pick_files_async()),
+                        ft.ElevatedButton("FOTO", icon=ft.icons.CAMERA_ALT, on_click=lambda _: page.run_task(picker.pick_files_async)),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
                     txt_imagem_nome,
