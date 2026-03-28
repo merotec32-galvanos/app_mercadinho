@@ -3,19 +3,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
+# 1. Pega a URL do Render
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# 2. Tratamento para evitar o erro 'None' e corrigir o prefixo
 if DATABASE_URL is None:
-    # Se ainda estiver vazio, este print aparecerá nos logs do Render para te avisar
-    print("ERRO: DATABASE_URL não encontrada. Verifique o vínculo do Environment Group!")
-    # URL temporária apenas para o deploy não travar
+    print("ERRO: DATABASE_URL não encontrada!")
     DATABASE_URL = "sqlite:///fallback.db" 
-else:
-    # Correção de prefixo para compatibilidade com SQLAlchemy moderno
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+elif DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

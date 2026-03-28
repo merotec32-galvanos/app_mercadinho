@@ -4,7 +4,7 @@ from fastapi import FastAPI
 import os
 import uvicorn
 import base64
-from database import carregar_dados, salvar_dados
+from database import carregar_dados, salvar_novo_produto, deletar_produto_db
 from cliente import cliente
 
 app = FastAPI()
@@ -89,7 +89,7 @@ async def main(page: ft.Page):
             novo = {"nome": txt_nome.value.upper(), "desc": txt_desc.value, "preco": txt_preco.value, 
                     "imagem": txt_imagem_nome.value if txt_imagem_nome.value != "Nenhuma foto selecionada" else ""}
             db.insert(0, novo)
-            salvar_dados(db)
+            salvar_novo_produto(db)
             txt_nome.value = ""; txt_desc.value = ""; txt_preco.value = ""
             txt_imagem_nome.value = "Nenhuma foto selecionada"; img_previa.visible = False
             page.pubsub.send_all("update")
