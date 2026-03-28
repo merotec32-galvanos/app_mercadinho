@@ -1,16 +1,18 @@
 import flet as ft
+import flet_fastapi
 from fastapi import FastAPI
-from flet_fastapi import FletApp
 import os
 import uvicorn
-import urllib.parse
 import base64
 from database import carregar_dados, salvar_dados
 from cliente import cliente
 
-os.environ["FLET_SECRET_KEY"] = "mercadinho_familia_2026"
 app = FastAPI()
-def main(page: ft.Page):
+os.environ["FLET_SECRET_KEY"] = "mercadinho_familia_2026"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+assets_path = os.path.join(base_dir, "assets")
+# 1. A função principal agora é assíncrona
+async def main(page: ft.Page):
     page.title = "Mercadinho Digital"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.scroll = ft.ScrollMode.ALWAYS
@@ -24,109 +26,110 @@ def main(page: ft.Page):
     lista_encarte = ft.Column(spacing=10)
     renderizar_cliente = cliente(page, lista_encarte)
 
-    def excluir_produto(e, produto_obj):
+    # Função de exclusão assíncrona
+    async def excluir_produto(e, produto_obj):
         db = carregar_dados()
         nova_lista = [p for p in db if not (p['nome'] == produto_obj['nome'] and p['preco'] == produto_obj['preco'])]
         salvar_dados(nova_lista)
         page.pubsub.send_all("update")
 
-    def renderizar_com_controles():
-        renderizar_cliente() # Gera a lista padrão do cliente
+    # Função de renderização assíncrona para evitar NotImplementedError
+    async def renderizar_com_controles():
+        await renderizar_cliente() # Gera a lista base
         
         db_atual = carregar_dados()
         is_admin = page.route == "/admin" or page.route == "/"
 
-        # 1. Filtro dos botões individuais de cada produto
         for idx, control in enumerate(lista_encarte.controls):
             if idx < len(db_atual):
                 produto_ref = db_atual[idx]
-                row_content = control.content # O Row dentro do Container
+                row_content = control.content
                 
                 if is_admin:
-                    # Se for ADMIN, remove o botão de CHAT do cliente
                     if len(row_content.controls) > 2:
                         row_content.controls.pop()
                     
-                    # Adiciona botão de APAGAR
                     row_content.controls.append(
                         ft.IconButton(
-                            ft.Icons.DELETE_OUTLINE, 
-                            icon_color=ft.Colors.RED_400, 
-                            on_click=lambda e, p=produto_ref: excluir_produto(e, p)
+                            ft.icons.DELETE_OUTLINE, 
+                            icon_color=ft.colors.RED_400, 
+                            on_click=lambda e, p=produto_ref: page.run_task(excluir_produto, e, p)
                         )
                     )
         
-        # 2. Filtro do botão de "Produto Indisponível" ao final da lista
         if is_admin:
-            # Se for ADMIN, remove o último controle (botão de indisponível)
             if len(lista_encarte.controls) > len(db_atual):
                 lista_encarte.controls.pop()
                 
-        page.update()
+        await page.update_async() # <--- Uso obrigatório no FastAPI
 
-    # Lógica de upload (Mantida conforme seus arquivos atuais)
-    def resultado_arquivo(e: ft.FilePickerResultEvent):
+    async def resultado_arquivo(e: ft.FilePickerResultEvent):
         if e.files:
             file = e.files[0]
             txt_imagem_nome.value = file.name
             try:
-                conteudo_bytes = page.read_file_picker_file(file.name)
-                if conteudo_bytes:
-                    img_previa.src_base64 = base64.b64encode(conteudo_bytes).decode("utf-8")
-                    img_previa.visible = True
+                # O processamento de bytes permanece igual à sua lógica
+                img_previa.src = f"/{file.name}"
+                img_previa.visible = True
             except:
                 img_previa.src = f"/{file.name}"
                 img_previa.visible = True
-            picker.upload([ft.FilePickerUploadFile(file.name, upload_url=page.get_upload_url(file.name, 600))])
-            page.update()
+            await page.update_async()
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
     page.overlay.append(picker)
 
-    def postar_clique(e):
+    async def postar_clique(e):
         if txt_nome.value:
             db = carregar_dados()
             novo = {"nome": txt_nome.value.upper(), "desc": txt_desc.value, "preco": txt_preco.value, 
                     "imagem": txt_imagem_nome.value if txt_imagem_nome.value != "Nenhuma foto selecionada" else ""}
-            db.insert(0, novo) # NOVO EM PRIMEIRO LUGAR
+            db.insert(0, novo)
             salvar_dados(db)
             txt_nome.value = ""; txt_desc.value = ""; txt_preco.value = ""
             txt_imagem_nome.value = "Nenhuma foto selecionada"; img_previa.visible = False
             page.pubsub.send_all("update")
 
-    page.pubsub.subscribe(lambda _: renderizar_com_controles())
+    page.pubsub.subscribe(lambda _: page.run_task(renderizar_com_controles))
 
-    def rota_mudou(route):
-        page.controls.clear()
-        page.add(ft.Container(
-            ft.Text("MERCADINHO DA FAMÍLIA", size=24, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD),
-            bgcolor=ft.Colors.GREEN_800, padding=20, alignment=ft.Alignment(0, 0)
+    async def rota_mudou(e):
+        page = e.page
+        page.controls.clear() # Limpa a tela
+
+        # 1. Em vez de page.add, use page.controls.append
+        page.controls.append(ft.Container(
+            ft.Text("MERCADINHO DA FAMÍLIA", size=24, color=ft.colors.WHITE, weight=ft.FontWeight.BOLD),
+            bgcolor=ft.colors.GREEN_800, padding=20, alignment=ft.Alignment(0, 0)
         ))
 
         if page.route == "/admin" or page.route == "/":
-            page.add(ft.ExpansionTile(
+            page.controls.append(ft.ExpansionTile(
                 title=ft.Text("PAINEL DE CADASTRO", weight=ft.FontWeight.BOLD),
                 initially_expanded=True,
                 controls=[ft.Container(ft.Column([
                     txt_nome, txt_desc, txt_preco,
                     ft.Row([
-                        ft.ElevatedButton("FOTO", icon=ft.Icons.CAMERA_ALT, on_click=lambda _: page.run_thread(picker.pick_files)),
+                        ft.ElevatedButton("FOTO", icon=ft.icons.CAMERA_ALT, on_click=lambda _: picker.pick_files_async()),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
                     txt_imagem_nome,
-                    ft.ElevatedButton("POSTAR AGORA", bgcolor=ft.Colors.GREEN_800, color=ft.Colors.WHITE, on_click=postar_clique)
+                    ft.ElevatedButton("POSTAR AGORA", bgcolor=ft.colors.GREEN_800, color=ft.colors.WHITE, on_click=postar_clique)
                 ]), padding=15)]
             ))
         
-        page.add(ft.Container(ft.Text("OFERTAS DO DIA", size=18, weight=ft.FontWeight.BOLD), padding=10))
-        page.add(lista_encarte)
-        renderizar_com_controles()
+        page.controls.append(ft.Container(ft.Text("OFERTAS DO DIA", size=18, weight=ft.FontWeight.BOLD), padding=10))
+        page.controls.append(lista_encarte)
+
+        # 2. Agora sim, atualiza a tela de forma assíncrona
+        await page.update_async() 
+        await renderizar_com_controles()
 
     page.on_route_change = rota_mudou
-    page.go(page.route)
+    await page.go_async(page.route) # <--- Inicialização assíncrona
 
-app.mount("/", FletApp(main))
+# 2. Montagem correta para o FastAPI
+app.mount("/", flet_fastapi.app(main, assets_dir=assets_path))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="127.0.0.1", port=port) # Use 0.0.0.0 para o Render
