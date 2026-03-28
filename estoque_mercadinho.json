@@ -1,0 +1,32 @@
+[
+    {
+        "nome": "BOLSA TÉRMICA",
+        "desc": "marrom grande ",
+        "preco": "49,99",
+        "imagem": "IMG-20260325-WA0013.jpeg"
+    },
+    {
+        "nome": "PAQUIMETRO",
+        "desc": "Ferramenta de medição",
+        "preco": "49,99",
+        "imagem": "paquimetro.webp"
+    },
+    {
+        "nome": "TESTE",
+        "desc": "",
+        "preco": "1.00",
+        "imagem": "dynapower-Cover.jpg"
+    },
+    {
+        "nome": "PRODUTO",
+        "desc": "Descrição",
+        "preco": "5.45",
+        "imagem": "paquimetro.webp"
+    },
+    {
+        "nome": "NOVO PRODUTO",
+        "desc": "Descrição do Novo Produto",
+        "preco": "10,50",
+        "imagem": "dynapower-Cover.jpg"
+    }
+]

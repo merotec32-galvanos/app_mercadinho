@@ -1,0 +1,10 @@
+[project]
+name = "meu-navegador-flet"
+version = "0.1.0"
+dependencies = ["flet==0.82.2"]
+
+[tool.flet.android]
+# Habilita explicitamente o tráfego HTTP (Cleartext) para o seu IP local
+manifest_attributes = { "android:usesCleartextTraffic" = "true" }
+# Garante as permissões básicas de rede
+permissions = ["INTERNET", "ACCESS_NETWORK_STATE"]
