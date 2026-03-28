@@ -27,14 +27,15 @@ async def main(page: ft.Page):
     renderizar_cliente = cliente(page, lista_encarte)
 
     # Função de exclusão assíncrona
-    async def excluir_produto(e, produto_obj):
+    async def excluir_produto(e, produto_ref):
+        # Deleta do PostgreSQL
+        deletar_produto_db(produto_ref['nome'], produto_ref['preco'])
         
-        # Deleta do PostgreSQL usando os dados do objeto
-        deletar_produto_db(produto_obj['nome'], produto_obj['preco'])
-        
-        # Atualiza a interface de forma assíncrona
-        await renderizar_com_controles()
+        # Notifica outros usuários e limpa a lista local antes de renderizar
         page.pubsub.send_all("update")
+        lista_encarte.controls.clear() # <--- Limpa a lista atual para não duplicar
+        await renderizar_com_controles()
+        await page.update_async()
 
     # Função de renderização assíncrona para evitar NotImplementedError
     async def renderizar_com_controles():
@@ -70,13 +71,9 @@ async def main(page: ft.Page):
         if e.files:
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            try:
-                # O processamento de bytes permanece igual à sua lógica
-                img_previa.src = f"/{file.name}"
-                img_previa.visible = True
-            except:
-                img_previa.src = f"/{file.name}"
-                img_previa.visible = True
+            # No Render, usamos o nome do arquivo para a prévia
+            img_previa.src = f"/{file.name}"
+            img_previa.visible = True
             await page.update_async()
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
@@ -125,7 +122,11 @@ async def main(page: ft.Page):
                 controls=[ft.Container(ft.Column([
                     txt_nome, txt_desc, txt_preco,
                     ft.Row([
-                        ft.ElevatedButton("FOTO", icon=ft.icons.CAMERA_ALT, on_click=lambda _: page.run_task(picker.pick_files_async)),
+                        ft.ElevatedButton(
+                        "FOTO", 
+                        icon=ft.icons.CAMERA_ALT, 
+                        on_click=lambda _: page.run_task(picker.pick_files_async) # <--- Uso correto do run_task
+                        ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
                     txt_imagem_nome,
