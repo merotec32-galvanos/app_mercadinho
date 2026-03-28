@@ -1,5 +1,6 @@
 import flet as ft
 import os
+import uvicorn
 import urllib.parse
 import base64
 from database import carregar_dados, salvar_dados
@@ -123,13 +124,6 @@ def main(page: ft.Page):
     page.go(page.route)
 
 if __name__ == "__main__":
-    porta_servidor = int(os.environ.get("PORT", 8550))
-    
-    ft.app(
-        target=main, 
-        host="10.20.0.221", # Permite conexões externas
-        port=porta_servidor, 
-        view=ft.AppView.WEB_BROWSER, 
-        assets_dir="assets", 
-        upload_dir="assets"
-    )
+    # O segredo para o Render tirar essa tela preta é ler a porta dele:
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=port)
