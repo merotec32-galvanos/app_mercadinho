@@ -3,10 +3,21 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Use a variável de ambiente do Render ou o link direto para testes locais
+# Tenta ler a variável do Render
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# Se a variável não for encontrada, o código abaixo evita o erro de 'None'
+if DATABASE_URL is None:
+    print("ERRO: A variável DATABASE_URL não foi encontrada nas configurações do Render!")
+    # Você pode colocar sua URL de teste local aqui temporariamente:
+    # DATABASE_URL = "postgres://user:pass@host/dbname"
+else:
+    # Se a URL começar com 'postgres://', o SQLAlchemy moderno exige 'postgresql://'
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
