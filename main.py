@@ -1,4 +1,5 @@
 import flet as ft
+import flet_fastapi
 import os
 import uvicorn
 import urllib.parse
@@ -123,7 +124,9 @@ def main(page: ft.Page):
     page.on_route_change = rota_mudou
     page.go(page.route)
 
+app = flet_fastapi.make_app(main)
+
 if __name__ == "__main__":
-    # O segredo para o Render tirar essa tela preta é ler a porta dele:
+    import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(fastapi_app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)
