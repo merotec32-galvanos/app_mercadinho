@@ -1,6 +1,6 @@
-flet==0.10.0
-urllib3
+flet
 flet-fastapi
 fastapi
+urllib3
 uvicorn
 gunicorn
