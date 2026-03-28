@@ -3,16 +3,15 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Tenta ler a variável do Render
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Se a variável não for encontrada, o código abaixo evita o erro de 'None'
 if DATABASE_URL is None:
-    print("ERRO: A variável DATABASE_URL não foi encontrada nas configurações do Render!")
-    # Você pode colocar sua URL de teste local aqui temporariamente:
-    # DATABASE_URL = "postgres://user:pass@host/dbname"
+    # Se ainda estiver vazio, este print aparecerá nos logs do Render para te avisar
+    print("ERRO: DATABASE_URL não encontrada. Verifique o vínculo do Environment Group!")
+    # URL temporária apenas para o deploy não travar
+    DATABASE_URL = "sqlite:///fallback.db" 
 else:
-    # Se a URL começar com 'postgres://', o SQLAlchemy moderno exige 'postgresql://'
+    # Correção de prefixo para compatibilidade com SQLAlchemy moderno
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
