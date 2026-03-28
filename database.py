@@ -1,21 +1,20 @@
-from sqlalchemy import create_engine, Column, String, Integer, Float
+import os
+from sqlalchemy import create_engine, Column, String, Integer, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
 
-# 1. Pega a URL do Render
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# 2. Tratamento para evitar o erro 'None' e corrigir o prefixo
-if DATABASE_URL is None:
-    print("ERRO: DATABASE_URL não encontrada!")
-    DATABASE_URL = "sqlite:///fallback.db" 
-elif DATABASE_URL.startswith("postgres://"):
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+# Se não houver URL, ele avisa no log em vez de falhar silenciosamente
+if not DATABASE_URL:
+    print("AVISO: DATABASE_URL não encontrada. A tabela NÃO será criada no Render.")
+    engine = create_engine("sqlite:///local.db")
+else:
+    print("CONECTANDO AO BANCO DE DADOS...")
+    engine = create_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
