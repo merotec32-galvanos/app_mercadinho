@@ -1,6 +1,8 @@
-flet
+flet==0.21.2
 flet-fastapi
-fastapi
+uvicorn
+httpcore==1.0.2
+httpx==0.25.2
 urllib3
 uvicorn
 gunicorn
