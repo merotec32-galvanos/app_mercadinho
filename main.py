@@ -1,5 +1,5 @@
 import flet as ft
-from flet_fastapi import flet_fastapi as ff
+from flet_fastapi import FletFastAPI
 import os
 import uvicorn
 import urllib.parse
@@ -124,7 +124,7 @@ def main(page: ft.Page):
     page.on_route_change = rota_mudou
     page.go(page.route)
 
-app = ff.make_app(main)
+app = FletFastAPI(main)
 
 if __name__ == "__main__":
     import uvicorn
