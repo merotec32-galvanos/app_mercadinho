@@ -113,10 +113,10 @@ async def main(page: ft.Page):
             
             # 4. ATUALIZA PARA TODOS
             page.pubsub.send_all("update")
-            await renderizar_com_controles() 
+            await renderizar_com_controles()
             await page.update_async()
 
-    page.pubsub.subscribe(lambda _: page.run_thread(renderizar_com_controles))
+    
 
     async def rota_mudou(e):
         page = e.page
