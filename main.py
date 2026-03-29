@@ -138,7 +138,7 @@ async def main(page: ft.Page):
                         ft.ElevatedButton(
                         "FOTO", 
                         icon=ft.icons.CAMERA_ALT, 
-                        on_click=lambda _: picker.pick_files_async()
+                        on_click=lambda _: picker.pick_files_async
                         ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
