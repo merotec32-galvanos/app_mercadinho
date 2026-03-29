@@ -25,12 +25,23 @@ async def main(page: ft.Page):
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files and e.files[0].base64:
+        if e.files:
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            # Atribui o conteúdo da imagem diretamente para a prévia
-            img_previa.src_base64 = file.base64
-            img_previa.visible = True
+            
+            # Tentativa de captura segura do conteúdo
+            try:
+                # Se o base64 falhar, mostramos apenas o nome para não travar o app
+                if hasattr(file, 'base64') and file.base64:
+                    img_previa.src_base64 = file.base64
+                    img_previa.visible = True
+                else:
+                    # Fallback: Apenas confirma que o arquivo foi selecionado
+                    print(f"Arquivo selecionado: {file.name}")
+                    img_previa.visible = False 
+            except Exception as ex:
+                print(f"Erro na prévia: {ex}")
+                
             await page.update_async()
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
