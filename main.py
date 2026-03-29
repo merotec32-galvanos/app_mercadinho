@@ -24,13 +24,11 @@ async def main(page: ft.Page):
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
-    string_base64 = ""
-
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files and e.files[0].base64:
+        if e.files and e.files[0].base64: # O upload_data=True ativa isso
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            # Armazena os bytes da imagem na prévia
+            # Guardamos o conteúdo real aqui:
             img_previa.src_base64 = file.base64 
             img_previa.visible = True
             await page.update_async()
@@ -89,13 +87,15 @@ async def main(page: ft.Page):
 
     async def postar_clique(e):
         if txt_nome.value:
-            nome = txt_nome.value.upper()
-            desc = txt_desc.value
-            preco = txt_preco.value
-            
+            # Agora pegamos o conteúdo que salvamos acima:
             imagem_para_salvar = img_previa.src_base64 if img_previa.visible else ""
             
-            salvar_novo_produto(nome, desc, preco, imagem_para_salvar)
+            salvar_novo_produto(
+                txt_nome.value.upper(), 
+                txt_desc.value, 
+                txt_preco.value, 
+                imagem_para_salvar
+            )
             
             # 3. LIMPA A INTERFACE
             txt_nome.value = ""
@@ -132,7 +132,7 @@ async def main(page: ft.Page):
                         ft.ElevatedButton(
                         "FOTO", 
                         icon=ft.icons.CAMERA_ALT, 
-                        on_click=picker.pick_files_async
+                        on_click=lambda _: picker.pick_files_async()
                         ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),

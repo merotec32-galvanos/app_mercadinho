@@ -22,7 +22,14 @@ def cliente(page: ft.Page, lista_encarte):
             
             card = ft.Container(
                 content=ft.Row([
-                    ft.Image(src=img_src, width=100, height=100, fit=ft.ImageFit.COVER, border_radius=8) if img_src else ft.Icon(ft.icons.SHOPPING_BASKET_ROUNDED, size=40, color=ft.colors.GREEN_600),
+                    ft.Image(
+                            # Usa src_base64 para ler o texto longo que vem do banco de dados
+                            src_base64=p.get("imagem", ""), 
+                            width=100, 
+                            height=100, 
+                            fit=ft.ImageFit.COVER, 
+                            border_radius=8
+                        ) if p.get("imagem") else ft.Icon(ft.icons.SHOPPING_BASKET_ROUNDED, size=40, color=ft.colors.GREEN_600),
                     ft.Column([
                         ft.Text(p["nome"], size=20, weight=ft.FontWeight.BOLD),
                         ft.Text(p["desc"], size=18),
