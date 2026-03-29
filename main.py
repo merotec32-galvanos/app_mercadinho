@@ -27,13 +27,13 @@ async def main(page: ft.Page):
     string_base64 = ""
 
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-    if e.files and e.files[0].base64:
-        file = e.files[0]
-        txt_imagem_nome.value = file.name
-        # Armazena os bytes da imagem na prévia
-        img_previa.src_base64 = file.base64 
-        img_previa.visible = True
-        await page.update_async()
+        if e.files and e.files[0].base64:
+            file = e.files[0]
+            txt_imagem_nome.value = file.name
+            # Armazena os bytes da imagem na prévia
+            img_previa.src_base64 = file.base64 
+            img_previa.visible = True
+            await page.update_async()
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
     picker.upload_data = True
