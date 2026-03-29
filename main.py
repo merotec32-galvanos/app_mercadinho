@@ -40,6 +40,7 @@ async def main(page: ft.Page):
             await page.update_async()
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
+    picker.upload_data = True
     page.overlay.append(picker)
     await page.update_async()
     
@@ -135,7 +136,7 @@ async def main(page: ft.Page):
                         ft.ElevatedButton(
                         "FOTO", 
                         icon=ft.icons.CAMERA_ALT, 
-                        on_click=picker.pick_files_async(upload_data=True)
+                        on_click=picker.pick_files_async()
                         ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
