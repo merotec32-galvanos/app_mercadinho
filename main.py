@@ -24,7 +24,7 @@ async def main(page: ft.Page):
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
-   async def resultado_arquivo(e: ft.FilePickerResultEvent):
+    async def resultado_arquivo(e: ft.FilePickerResultEvent):
         if e.files and e.files[0].base64:
             file = e.files[0]
             txt_imagem_nome.value = file.name
