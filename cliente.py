@@ -20,6 +20,9 @@ def cliente(page: ft.Page, lista_encarte):
             
             msg=f"Olá, poderia entregar {p['nome']} R${p['preco']} ?"
             msg_encoded = urllib.parse.quote(msg)
+            async def enviar_whatsapp(e):
+                # O dado do produto é recuperado pelo e.control.data
+                await page.launch_url_async(e.control.data)
             
             card = ft.Container(
                 content=ft.Row([
@@ -39,9 +42,9 @@ def cliente(page: ft.Page, lista_encarte):
                     ft.IconButton(
                         ft.icons.CHAT_OUTLINED, 
                         icon_color=ft.colors.GREEN_600,
-                        data="btn_chat",
-                        # Chamada de URL agora é assíncrona
-                        on_click=lambda _: page.launch_url_async(f"https://wa.me/+5521977787707?text={msg_encoded}")
+                        # Passamos a URL pronta no data para a função ler
+                        data=f"https://wa.me/+5521977787707?text={msg_encoded}",
+                        on_click=enviar_whatsapp # Referência direta à função async
                     )
                 ]),
                 padding=10, border=ft.border.all(1, ft.colors.GREY_200), border_radius=10
