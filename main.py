@@ -2,6 +2,7 @@ import flet as ft
 import flet_fastapi
 from fastapi import FastAPI
 import os
+import asyncio
 import uvicorn
 import base64
 from database import carregar_dados, salvar_novo_produto, deletar_produto_db
@@ -115,7 +116,7 @@ async def main(page: ft.Page):
             await renderizar_com_controles() 
             await page.update_async()
 
-    page.pubsub.subscribe(renderizar_com_controles)
+    page.pubsub.subscribe(lambda _: asyncio.create_task(renderizar_com_controles(_)))
 
     async def rota_mudou(e):
         page = e.page
