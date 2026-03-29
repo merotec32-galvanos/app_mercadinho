@@ -19,6 +19,7 @@ def cliente(page: ft.Page, lista_encarte):
             img_src = img_nome if img_nome else None
             
             msg=f"Olá, poderia entregar {p['nome']} R${p['preco']} ?"
+            msg_encoded = urllib.parse.quote(msg)
             
             card = ft.Container(
                 content=ft.Row([
@@ -40,7 +41,7 @@ def cliente(page: ft.Page, lista_encarte):
                         icon_color=ft.colors.GREEN_600,
                         data="btn_chat",
                         # Chamada de URL agora é assíncrona
-                        on_click=lambda e: page.launch_url_async(f"https://wa.me/+5521977787707?text={msg}")
+                        on_click=lambda _: page.launch_url_async(f"https://wa.me/+5521977787707?text={msg_encoded}")
                     )
                 ]),
                 padding=10, border=ft.border.all(1, ft.colors.GREY_200), border_radius=10
