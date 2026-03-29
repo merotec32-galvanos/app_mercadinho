@@ -24,18 +24,12 @@ async def main(page: ft.Page):
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
-    async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files:
+   async def resultado_arquivo(e: ft.FilePickerResultEvent):
+        if e.files and e.files[0].base64:
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            
-            if file.path is None: 
-                # Para Web (Render):
-                img_previa.src_base64 = file.base64
-            else:
-                # Para Desktop local:
-                img_previa.src = file.path
-                
+            # Atribui o conteúdo da imagem diretamente para a prévia
+            img_previa.src_base64 = file.base64
             img_previa.visible = True
             await page.update_async()
 
