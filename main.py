@@ -25,6 +25,20 @@ async def main(page: ft.Page):
     
     lista_encarte = ft.Column(spacing=10)
     renderizar_cliente = cliente(page, lista_encarte)
+    
+    async def resultado_arquivo(e: ft.FilePickerResultEvent):
+        if e.files:
+            file = e.files[0]
+            txt_imagem_nome.value = file.name
+            # No Render, usamos o nome para referência visual
+            img_previa.src = f"/{file.name}"
+            img_previa.visible = True
+            await page.update_async()
+
+    
+    picker = ft.FilePicker(on_result=resultado_arquivo)
+    page.overlay.append(picker)
+    await page.update_async()
 
     # Função de exclusão assíncrona
     async def excluir_produto(e):
@@ -69,17 +83,6 @@ async def main(page: ft.Page):
                 
         await page.update_async() # <--- Uso obrigatório no FastAPI
 
-    async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files:
-            file = e.files[0]
-            txt_imagem_nome.value = file.name
-            img_previa.src = f"/{file.name}"
-            img_previa.visible = True
-            await page.update_async()
-
-    picker = ft.FilePicker(on_result=resultado_arquivo)
-    page.overlay.append(picker)
-    await page.update_async()
 
     async def postar_clique(e):
         if txt_nome.value:
@@ -126,7 +129,7 @@ async def main(page: ft.Page):
                         ft.ElevatedButton(
                         "FOTO", 
                         icon=ft.icons.CAMERA_ALT, 
-                        on_click=picker.pick_files_async()
+                        on_click=lambda _: picker.pick_files()
                         ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
