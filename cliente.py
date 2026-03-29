@@ -40,7 +40,7 @@ def cliente(page: ft.Page, lista_encarte):
                         icon_color=ft.colors.GREEN_600,
                         data="btn_chat",
                         # Chamada de URL agora é assíncrona
-                        on_click=page.launch_url_async(f"https://wa.me/+5521977787707?text={msg}")
+                        on_click=lambda e: page.launch_url_async(f"https://wa.me/+5521977787707?text={msg}")
                     )
                 ]),
                 padding=10, border=ft.border.all(1, ft.colors.GREY_200), border_radius=10
