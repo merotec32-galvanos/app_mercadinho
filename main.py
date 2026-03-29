@@ -24,30 +24,21 @@ async def main(page: ft.Page):
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
+    string_base64 = ""
+
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files:
-            file = e.files[0]
-            txt_imagem_nome.value = file.name
-            
-            # Tentativa de captura segura do conteúdo
-            try:
-                # Se o base64 falhar, mostramos apenas o nome para não travar o app
-                if hasattr(file, 'base64') and file.base64:
-                    img_previa.src_base64 = file.base64
-                    img_previa.visible = True
-                else:
-                    # Fallback: Apenas confirma que o arquivo foi selecionado
-                    print(f"Arquivo selecionado: {file.name}")
-                    img_previa.visible = False 
-            except Exception as ex:
-                print(f"Erro na prévia: {ex}")
-                
-            await page.update_async()
+    if e.files and e.files[0].base64:
+        file = e.files[0]
+        txt_imagem_nome.value = file.name
+        # Armazena os bytes da imagem na prévia
+        img_previa.src_base64 = file.base64 
+        img_previa.visible = True
+        await page.update_async()
 
     picker = ft.FilePicker(on_result=resultado_arquivo)
     picker.upload_data = True
     page.overlay.append(picker)
-    await page.update_async()
+    
     
     lista_encarte = ft.Column(spacing=10)
     renderizar_cliente = cliente(page, lista_encarte)
@@ -98,23 +89,23 @@ async def main(page: ft.Page):
 
     async def postar_clique(e):
         if txt_nome.value:
-            # 1. Pega os valores diretamente dos campos de texto
             nome = txt_nome.value.upper()
             desc = txt_desc.value
             preco = txt_preco.value
-            imagem = txt_imagem_nome.value if txt_imagem_nome.value != "Nenhuma foto selecionada" else ""
             
-            # 2. Chama a função do database.py passando os 4 argumentos
-            salvar_novo_produto(nome, desc, preco, imagem)
+            imagem_para_salvar = img_previa.src_base64 if img_previa.visible else ""
             
-            # 3. Limpa a interface
+            salvar_novo_produto(nome, desc, preco, imagem_para_salvar)
+            
+            # 3. LIMPA A INTERFACE
             txt_nome.value = ""
             txt_desc.value = ""
             txt_preco.value = ""
             txt_imagem_nome.value = "Nenhuma foto selecionada"
+            img_previa.src_base64 = "" # Limpa os dados da imagem
             img_previa.visible = False
             
-            # 4. Notifica todos e renderiza a nova lista
+            # 4. ATUALIZA PARA TODOS
             page.pubsub.send_all("update")
             await renderizar_com_controles() 
             await page.update_async()
