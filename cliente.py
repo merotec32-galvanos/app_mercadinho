@@ -25,7 +25,7 @@ def cliente(page: ft.Page, lista_encarte):
                 content=ft.Row([
                     ft.Image(
                             # Usa src_base64 para ler o texto longo que vem do banco de dados
-                            src=p.get("imagem", ""), 
+                            src_base64=p.get("imagem", ""), 
                             width=100, 
                             height=100, 
                             fit=ft.ImageFit.COVER, 

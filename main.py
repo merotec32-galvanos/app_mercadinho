@@ -93,10 +93,15 @@ async def main(page: ft.Page):
 
     async def postar_clique(e):
         if txt_nome.value:
-            # Agora pegamos o conteúdo que salvamos acima:
-            imagem_caminho = img_previa.src if img_previa.visible else ""
-            salvar_novo_produto(txt_nome.value.upper(), txt_desc.value, txt_preco.value, imagem_caminho)
+            # MUDANÇA AQUI: Pegamos o src_base64, que contém os dados reais da foto
+            imagem_para_salvar = img_previa.src_base64 if img_previa.visible else ""
             
+            salvar_novo_produto(
+                txt_nome.value.upper(), 
+                txt_desc.value, 
+                txt_preco.value, 
+                imagem_para_salvar # Enviamos o texto longo para o PostgreSQL
+            )
             # 3. LIMPA A INTERFACE
             txt_nome.value = ""
             txt_desc.value = ""
