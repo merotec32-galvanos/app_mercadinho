@@ -28,12 +28,14 @@ async def main(page: ft.Page):
 
     # Função de exclusão assíncrona
     async def excluir_produto(e, produto_ref):
-        # Deleta do PostgreSQL
+        # Envia o comando para o PostgreSQL
         deletar_produto_db(produto_ref['nome'], produto_ref['preco'])
         
-        # Notifica outros usuários e limpa a lista local antes de renderizar
+        # Notifica outros utilizadores
         page.pubsub.send_all("update")
-        lista_encarte.controls.clear() # <--- Limpa a lista atual para não duplicar
+        
+        # Limpa e recarrega a lista visualmente
+        lista_encarte.controls.clear() 
         await renderizar_com_controles()
         await page.update_async()
 
@@ -71,7 +73,6 @@ async def main(page: ft.Page):
         if e.files:
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            # No Render, usamos o nome do arquivo para a prévia
             img_previa.src = f"/{file.name}"
             img_previa.visible = True
             await page.update_async()
@@ -149,4 +150,4 @@ app.mount("/", flet_fastapi.app(main, assets_dir=assets_path))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="127.0.0.1", port=port) # Use 0.0.0.0 para o Render
+    uvicorn.run(app, host="0.0.0.0", port=port) # Use 0.0.0.0 para o Render
