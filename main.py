@@ -24,10 +24,6 @@ async def main(page: ft.Page):
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
-    picker = ft.FilePicker(on_result=resultado_arquivo)
-    picker.upload_url = page.get_upload_url("temp", 600) # Cria link de upload
-    page.overlay.append(picker)
-
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
         if e.files:
             file = e.files[0]
@@ -43,6 +39,9 @@ async def main(page: ft.Page):
             img_previa.visible = True
             await page.update_async()
     
+    picker = ft.FilePicker(on_result=resultado_arquivo)
+    picker.upload_url = page.get_upload_url("temp", 600) # Cria link de upload
+    page.overlay.append(picker)
     
     lista_encarte = ft.Column(spacing=10)
     renderizar_cliente = cliente(page, lista_encarte)
