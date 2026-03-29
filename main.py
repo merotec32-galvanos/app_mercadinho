@@ -13,6 +13,10 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 assets_path = os.path.join(base_dir, "assets")
 # 1. A função principal agora é assíncrona
 async def main(page: ft.Page):
+    picker = ft.FilePicker(on_result=resultado_arquivo)
+    page.overlay.append(picker)
+    await page.update_async()
+    
     page.title = "Mercadinho Digital"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.scroll = ft.ScrollMode.ALWAYS
@@ -27,8 +31,11 @@ async def main(page: ft.Page):
     renderizar_cliente = cliente(page, lista_encarte)
 
     # Função de exclusão assíncrona
-    async def excluir_produto(e, produto_id):
+    async def excluir_produto(e):
+        # O e.control.data contém o ID que guardamos no botão
+        produto_id = e.control.data 
         deletar_produto_db(produto_id)
+        
         page.pubsub.send_all("update")
         lista_encarte.controls.clear()
         await renderizar_com_controles()
@@ -50,12 +57,13 @@ async def main(page: ft.Page):
                     if len(row_content.controls) > 2:
                         row_content.controls.pop()
                     
+                    id_para_deletar = produto_ref['id'] # Criar uma variável local fixa para o loop
                     row_content.controls.append(
                         ft.IconButton(
                             ft.icons.DELETE_OUTLINE, 
                             icon_color=ft.colors.RED_400, 
-                            # Passamos produto_ref['id'] em vez de nome e preço
-                            on_click=lambda e, p_id=produto_ref['id']: excluir_produto(e, p_id)
+                            data=id_para_deletar, # Guardar o ID nos dados do botão
+                            on_click=excluir_produto # Chamar a função diretamente
                         )
                     )
         
@@ -73,9 +81,7 @@ async def main(page: ft.Page):
             img_previa.visible = True
             await page.update_async()
 
-    picker = ft.FilePicker(on_result=resultado_arquivo)
-    page.overlay.append(picker)
-    await page.update_async()
+    
 
     async def postar_clique(e):
         if txt_nome.value:
@@ -122,7 +128,7 @@ async def main(page: ft.Page):
                         ft.ElevatedButton(
                         "FOTO", 
                         icon=ft.icons.CAMERA_ALT, 
-                        on_click=lambda _: picker.pick_files_async()
+                        on_click=picker.pick_files_async()
                         ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
