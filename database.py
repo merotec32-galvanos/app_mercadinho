@@ -32,9 +32,9 @@ Base.metadata.create_all(bind=engine)
 
 def carregar_dados():
     db = SessionLocal()
-    # Converte os objetos do banco para o formato de dicionário que seu código já usa
     produtos = db.query(Produto).order_by(Produto.id.desc()).all()
-    lista = [{"nome": p.nome, "desc": p.desc, "preco": p.preco, "imagem": p.imagem} for p in produtos]
+    # Incluímos o ID aqui para o botão de lixeira saber quem ele é
+    lista = [{"id": p.id, "nome": p.nome, "desc": p.desc, "preco": p.preco, "imagem": p.imagem} for p in produtos]
     db.close()
     return lista
 
@@ -45,23 +45,18 @@ def salvar_novo_produto(nome, desc, preco, imagem):
     db.commit()
     db.close()
 
-def deletar_produto_db(nome, preco):
+def deletar_produto_db(produto_id):
     db = SessionLocal()
     try:
-        # Busca o produto ignorando espaços em branco extras
-        produto = db.query(Produto).filter(
-            Produto.nome == nome.strip(), 
-            Produto.preco == preco.strip()
-        ).first()
+        # Busca direta pela chave primária (muito mais rápido e seguro)
+        produto = db.query(Produto).filter(Produto.id == produto_id).first()
         
         if produto:
             db.delete(produto)
             db.commit()
-            print(f"SUCESSO: {nome} deletado do banco real.")
-        else:
-            print(f"AVISO: Produto {nome} com preço {preco} não encontrado.")
+            print(f"SUCESSO: Produto ID {produto_id} deletado.")
     except Exception as e:
         db.rollback()
-        print(f"ERRO AO DELETAR: {e}")
+        print(f"ERRO: {e}")
     finally:
         db.close()

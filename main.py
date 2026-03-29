@@ -27,15 +27,10 @@ async def main(page: ft.Page):
     renderizar_cliente = cliente(page, lista_encarte)
 
     # Função de exclusão assíncrona
-    async def excluir_produto(e, produto_ref):
-        # Envia o comando para o PostgreSQL
-        deletar_produto_db(produto_ref['nome'], produto_ref['preco'])
-        
-        # Notifica outros utilizadores
+    async def excluir_produto(e, produto_id):
+        deletar_produto_db(produto_id)
         page.pubsub.send_all("update")
-        
-        # Limpa e recarrega a lista visualmente
-        lista_encarte.controls.clear() 
+        lista_encarte.controls.clear()
         await renderizar_com_controles()
         await page.update_async()
 
@@ -59,7 +54,8 @@ async def main(page: ft.Page):
                         ft.IconButton(
                             ft.icons.DELETE_OUTLINE, 
                             icon_color=ft.colors.RED_400, 
-                            on_click=lambda e, p=produto_ref: page.run_task(excluir_produto, e, p)
+                            # Passamos produto_ref['id'] em vez de nome e preço
+                            on_click=lambda e, p_id=produto_ref['id']: page.run_task(excluir_produto, e, p_id)
                         )
                     )
         
