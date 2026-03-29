@@ -24,18 +24,24 @@ async def main(page: ft.Page):
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
+    picker = ft.FilePicker(on_result=resultado_arquivo)
+    picker.upload_url = page.get_upload_url("temp", 600) # Cria link de upload
+    page.overlay.append(picker)
+
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files and e.files[0].base64: # O upload_data=True ativa isso
+        if e.files:
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            # Guardamos o conteúdo real aqui:
-            img_previa.src_base64 = file.base64 
+            
+            # Faz o upload real do arquivo para o servidor Render
+            await picker.upload_async([
+                ft.FilePickerUploadFile(file.name, upload_url=page.get_upload_url(file.name, 600))
+            ])
+            
+            # A prévia usa o link de upload, SEM BASE64
+            img_previa.src = f"/uploads/{file.name}" 
             img_previa.visible = True
             await page.update_async()
-
-    picker = ft.FilePicker(on_result=resultado_arquivo)
-    picker.upload_data = True
-    page.overlay.append(picker)
     
     
     lista_encarte = ft.Column(spacing=10)
@@ -88,14 +94,8 @@ async def main(page: ft.Page):
     async def postar_clique(e):
         if txt_nome.value:
             # Agora pegamos o conteúdo que salvamos acima:
-            imagem_para_salvar = img_previa.src_base64 if img_previa.visible else ""
-            
-            salvar_novo_produto(
-                txt_nome.value.upper(), 
-                txt_desc.value, 
-                txt_preco.value, 
-                imagem_para_salvar
-            )
+            imagem_caminho = img_previa.src if img_previa.visible else ""
+            salvar_novo_produto(txt_nome.value.upper(), txt_desc.value, txt_preco.value, imagem_caminho)
             
             # 3. LIMPA A INTERFACE
             txt_nome.value = ""
