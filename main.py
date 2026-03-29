@@ -55,7 +55,7 @@ async def main(page: ft.Page):
                             ft.icons.DELETE_OUTLINE, 
                             icon_color=ft.colors.RED_400, 
                             # Passamos produto_ref['id'] em vez de nome e preço
-                            on_click=lambda e, p_id=produto_ref['id']: page.run_task(excluir_produto, e, p_id)
+                            on_click=lambda e, p_id=produto_ref['id']: excluir_produto(e, p_id)
                         )
                     )
         
@@ -122,7 +122,7 @@ async def main(page: ft.Page):
                         ft.ElevatedButton(
                         "FOTO", 
                         icon=ft.icons.CAMERA_ALT, 
-                        on_click=lambda _: page.run_task(picker.pick_files_async) # <--- Uso correto do run_task
+                        on_click=lambda _: picker.pick_files_async()
                         ),
                         img_previa
                     ], alignment=ft.MainAxisAlignment.START),
