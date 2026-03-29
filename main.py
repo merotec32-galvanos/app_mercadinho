@@ -116,7 +116,7 @@ async def main(page: ft.Page):
             await renderizar_com_controles() 
             await page.update_async()
 
-    page.pubsub.subscribe(lambda _: asyncio.create_task(renderizar_com_controles(_)))
+    page.pubsub.subscribe(lambda _: page.run_thread(renderizar_com_controles))
 
     async def rota_mudou(e):
         page = e.page
