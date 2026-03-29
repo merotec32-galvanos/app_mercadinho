@@ -53,7 +53,7 @@ async def main(page: ft.Page):
         await page.update_async()
 
     # Função de renderização assíncrona para evitar NotImplementedError
-    async def renderizar_com_controles():
+    async def renderizar_com_controles(_):
         await renderizar_cliente() # Gera a lista base
         
         db_atual = carregar_dados()
