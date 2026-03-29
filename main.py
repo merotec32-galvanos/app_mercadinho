@@ -20,26 +20,32 @@ async def main(page: ft.Page):
     txt_nome = ft.TextField(label="Nome do Produto")
     txt_desc = ft.TextField(label="Descrição")
     txt_preco = ft.TextField(label="Preço")
+    
     txt_imagem_nome = ft.Text("Nenhuma foto selecionada", size=12, italic=True)
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
-    
-    lista_encarte = ft.Column(spacing=10)
-    renderizar_cliente = cliente(page, lista_encarte)
-    
+
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
         if e.files:
             file = e.files[0]
             txt_imagem_nome.value = file.name
-            # No Render, usamos o nome para referência visual
-            img_previa.src = f"/{file.name}"
+            
+            if file.path is None: 
+                # Para Web (Render):
+                img_previa.src_base64 = file.base64
+            else:
+                # Para Desktop local:
+                img_previa.src = file.path
+                
             img_previa.visible = True
             await page.update_async()
 
-    
     picker = ft.FilePicker(on_result=resultado_arquivo)
     page.overlay.append(picker)
     await page.update_async()
-
+    
+    lista_encarte = ft.Column(spacing=10)
+    renderizar_cliente = cliente(page, lista_encarte)
+    
     # Função de exclusão assíncrona
     async def excluir_produto(e):
         # O e.control.data contém o ID que guardamos no botão
