@@ -13,10 +13,6 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 assets_path = os.path.join(base_dir, "assets")
 # 1. A função principal agora é assíncrona
 async def main(page: ft.Page):
-    picker = ft.FilePicker(on_result=resultado_arquivo)
-    page.overlay.append(picker)
-    await page.update_async()
-    
     page.title = "Mercadinho Digital"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.scroll = ft.ScrollMode.ALWAYS
@@ -81,7 +77,9 @@ async def main(page: ft.Page):
             img_previa.visible = True
             await page.update_async()
 
-    
+    picker = ft.FilePicker(on_result=resultado_arquivo)
+    page.overlay.append(picker)
+    await page.update_async()
 
     async def postar_clique(e):
         if txt_nome.value:
