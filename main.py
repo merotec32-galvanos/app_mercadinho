@@ -11,7 +11,7 @@ app = FastAPI()
 os.environ["FLET_SECRET_KEY"] = "mercadinho_familia_2026"
 base_dir = os.path.dirname(os.path.abspath(__file__))
 assets_path = os.path.join(base_dir, "assets")
-# 1. A função principal agora é assíncrona
+
 async def main(page: ft.Page):
     page.title = "Mercadinho Digital"
     page.theme_mode = ft.ThemeMode.LIGHT
@@ -25,7 +25,6 @@ async def main(page: ft.Page):
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        # Mudamos para uma verificação que não trava o app
         if e.files and len(e.files) > 0:
             file = e.files[0]
             txt_imagem_nome.value = file.name
