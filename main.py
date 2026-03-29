@@ -25,22 +25,24 @@ async def main(page: ft.Page):
     img_previa = ft.Image(src="", width=120, height=120, fit=ft.ImageFit.COVER, border_radius=8, visible=False)
 
     async def resultado_arquivo(e: ft.FilePickerResultEvent):
-        if e.files:
+        # Mudamos para uma verificação que não trava o app
+        if e.files and len(e.files) > 0:
             file = e.files[0]
             txt_imagem_nome.value = file.name
             
-            # Faz o upload real do arquivo para o servidor Render
-            await picker.upload_async([
-                ft.FilePickerUploadFile(file.name, upload_url=page.get_upload_url(file.name, 600))
-            ])
+            # Tentativa segura de pegar o base64
+            if hasattr(file, 'base64') and file.base64:
+                img_previa.src_base64 = file.base64
+                img_previa.visible = True
+            else:
+                # Se o base64 falhar, apenas avisamos e não deixamos o app cair
+                img_previa.visible = False
             
-            # A prévia usa o link de upload, SEM BASE64
-            img_previa.src = f"/uploads/{file.name}" 
-            img_previa.visible = True
             await page.update_async()
-    
+
     picker = ft.FilePicker(on_result=resultado_arquivo)
-    picker.upload_url = page.get_upload_url("temp", 600) # Cria link de upload
+    # IMPORTANTE: No Render, configuramos o dado aqui e não no upload_url
+    picker.upload_data = True 
     page.overlay.append(picker)
     
     lista_encarte = ft.Column(spacing=10)
@@ -58,7 +60,7 @@ async def main(page: ft.Page):
         await page.update_async()
 
     # Função de renderização assíncrona para evitar NotImplementedError
-    async def renderizar_com_controles():
+    async def renderizar_com_controles(_=None):
         await renderizar_cliente() # Gera a lista base
         
         db_atual = carregar_dados()
